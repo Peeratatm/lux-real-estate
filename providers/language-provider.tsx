@@ -1,7 +1,8 @@
 'use client';
 
 import { createContext, useState, useEffect, ReactNode } from 'react';
-import { loadDictionary } from '@/lib/i18n/dictionaries';
+// Import the actual dictionaries for direct use if needed for default
+import { loadDictionary, englishDictionary } from '@/lib/i18n/dictionaries';
 
 export type Locale = 'en' | 'th';
 
@@ -14,7 +15,7 @@ interface LanguageContextType {
 export const LanguageContext = createContext<LanguageContextType>({
   locale: 'en',
   setLocale: () => {},
-  dictionary: {},
+  dictionary: englishDictionary, // Provide default dictionary directly
 });
 
 interface LanguageProviderProps {
@@ -23,7 +24,8 @@ interface LanguageProviderProps {
 
 export function LanguageProvider({ children }: LanguageProviderProps) {
   const [locale, setLocale] = useState<Locale>('en');
-  const [dictionary, setDictionary] = useState<Record<string, any>>({});
+  // Initialize with the default English dictionary to avoid empty dictionary during SSR/build
+  const [dictionary, setDictionary] = useState<Record<string, any>>(englishDictionary);
 
   useEffect(() => {
     // Try to get saved locale from localStorage
@@ -39,16 +41,21 @@ export function LanguageProvider({ children }: LanguageProviderProps) {
   }, []);
 
   useEffect(() => {
-    const loadLanguage = async () => {
-      const dict = await loadDictionary(locale);
-      setDictionary(dict);
+    // This effect will run on the client to potentially switch to another language
+    // or load a different dictionary if the locale changes from 'en'.
+    const loadAndSetLanguage = async () => {
+      if (locale !== 'en' || Object.keys(dictionary).length === 0 || dictionary !== englishDictionary ) {
+        // Only load if locale is not 'en' or if dictionary is somehow still empty or not the default
+        const dict = await loadDictionary(locale);
+        setDictionary(dict);
+      }
+      // Client-side only operations
       localStorage.setItem('locale', locale);
-      // Update the html lang attribute
       document.documentElement.lang = locale;
     };
 
-    loadLanguage();
-  }, [locale]);
+    loadAndSetLanguage();
+  }, [locale]); // Removed 'dictionary' from deps to avoid loop if loadDictionary returns same object ref for 'en'
 
   return (
     <LanguageContext.Provider value={{ locale, setLocale, dictionary }}>

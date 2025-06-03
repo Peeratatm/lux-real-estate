@@ -29,7 +29,7 @@ export function useTranslation() {
 
     // Replace parameters in the string if they exist
     if (params) {
-      return Object.entries(params).reduce((acc, [paramKey, paramValue]) => {
+      return Object.entries(params).reduce((acc: string, [paramKey, paramValue]) => {
         return acc.replace(new RegExp(`\\{${paramKey}\\}`, 'g'), String(paramValue));
       }, value);
     }
