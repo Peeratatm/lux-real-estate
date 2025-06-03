@@ -9,7 +9,7 @@ export async function loadDictionary(locale: string) {
   }
 }
 
-const englishDictionary = {
+export const englishDictionary = {
   common: {
     loading: 'Loading...',
     error: 'An error occurred',
@@ -159,7 +159,7 @@ const englishDictionary = {
   },
 };
 
-const thaiDictionary = {
+export const thaiDictionary = {
   common: {
     loading: 'กำลังโหลด...',
     error: 'เกิดข้อผิดพลาด',
